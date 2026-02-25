@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from goldman_ai.models import GoldmanAIModel
-from goldman_ai.pipelines.output_store import ensure_output_image, output_url_from_path
+from goldman_ai.pipelines.output_store import output_url_from_path, persist_generated_image
 from goldman_ai.pipelines.processing import run_goldman_sampling
 
 
@@ -25,13 +25,15 @@ def run_text_to_image(
         sampler_iterations=sampler_iterations,
         processing_params=processing_params,
     )
+    generated_images = model.generate_text_to_image(prompt=prompt, sample_count=settings["sample_count"])
+
     output_images = []
     sampler_debug = []
-    for idx in range(settings["sample_count"]):
-        output_path = f"{settings['output_dir']}/text_to_image_{idx + 1}.png"
-        ensure_output_image(output_path)
+    for idx, generated in enumerate(generated_images, start=1):
+        output_path = f"{settings['output_dir']}/text_to_image_{idx}.png"
+        persisted = persist_generated_image(generated, output_path)
         sampled = run_goldman_sampling(
-            output_path,
+            persisted,
             iterations=settings["sampler_iterations"],
             params=processing_params,
         )

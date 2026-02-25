@@ -31,7 +31,9 @@ src/goldman_ai/
 2. Install runtime dependencies:
 
    ```bash
-   pip install fastapi uvicorn pydantic
+   pip install fastapi uvicorn pydantic pillow
+   # Optional real backend:
+   pip install diffusers torch transformers accelerate
    ```
 
 3. Expose the package from `src` during local development:
@@ -111,3 +113,6 @@ http://localhost:8000/outputs/text_to_image_1.png
 - The app writes placeholder PNG artifacts into `./outputs/` so web and download flows are testable end-to-end.
 - Processing-step details are returned separately under `sampler_debug`.
 - Replace `GoldmanAIModel.load()` and pipeline internals with concrete model backend code (e.g., Diffusers) for production inference.
+
+
+- `GoldmanAIModel` now attempts to load Diffusers pipelines when dependencies are available; otherwise it falls back to generated placeholder images.

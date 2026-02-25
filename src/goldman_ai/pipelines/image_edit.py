@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from goldman_ai.models import GoldmanAIModel
-from goldman_ai.pipelines.output_store import ensure_output_image, output_url_from_path
+from goldman_ai.pipelines.output_store import output_url_from_path, persist_generated_image
 from goldman_ai.pipelines.processing import run_goldman_sampling
 
 
@@ -27,13 +27,20 @@ def add_object(
         sampler_iterations=sampler_iterations,
         processing_params=processing_params,
     )
+    generated_images = model.edit_add_object(
+        image=image,
+        object_prompt=object_prompt,
+        mask_or_box=mask_or_box,
+        sample_count=settings["sample_count"],
+    )
+
     output_images = []
     sampler_debug = []
-    for idx in range(settings["sample_count"]):
-        output_path = f"{settings['output_dir']}/add_object_{idx + 1}.png"
-        ensure_output_image(output_path)
+    for idx, generated in enumerate(generated_images, start=1):
+        output_path = f"{settings['output_dir']}/add_object_{idx}.png"
+        persisted = persist_generated_image(generated, output_path)
         sampled = run_goldman_sampling(
-            output_path,
+            persisted,
             iterations=settings["sampler_iterations"],
             params=processing_params,
         )
@@ -68,13 +75,19 @@ def remove_object(
         sampler_iterations=sampler_iterations,
         processing_params=processing_params,
     )
+    generated_images = model.edit_remove_object(
+        image=image,
+        mask_or_box=mask_or_box,
+        sample_count=settings["sample_count"],
+    )
+
     output_images = []
     sampler_debug = []
-    for idx in range(settings["sample_count"]):
-        output_path = f"{settings['output_dir']}/remove_object_{idx + 1}.png"
-        ensure_output_image(output_path)
+    for idx, generated in enumerate(generated_images, start=1):
+        output_path = f"{settings['output_dir']}/remove_object_{idx}.png"
+        persisted = persist_generated_image(generated, output_path)
         sampled = run_goldman_sampling(
-            output_path,
+            persisted,
             iterations=settings["sampler_iterations"],
             params=processing_params,
         )
@@ -108,13 +121,19 @@ def restyle_image(
         sampler_iterations=sampler_iterations,
         processing_params=processing_params,
     )
+    generated_images = model.edit_restyle(
+        image=image,
+        style_prompt=style_prompt,
+        sample_count=settings["sample_count"],
+    )
+
     output_images = []
     sampler_debug = []
-    for idx in range(settings["sample_count"]):
-        output_path = f"{settings['output_dir']}/restyle_image_{idx + 1}.png"
-        ensure_output_image(output_path)
+    for idx, generated in enumerate(generated_images, start=1):
+        output_path = f"{settings['output_dir']}/restyle_image_{idx}.png"
+        persisted = persist_generated_image(generated, output_path)
         sampled = run_goldman_sampling(
-            output_path,
+            persisted,
             iterations=settings["sampler_iterations"],
             params=processing_params,
         )

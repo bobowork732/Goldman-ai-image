@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 # Minimal valid 1x1 transparent PNG.
 _PNG_BYTES = (
@@ -17,6 +18,23 @@ def ensure_output_image(output_path: str) -> str:
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(_PNG_BYTES)
+    return str(path)
+
+
+def persist_generated_image(image: Any, output_path: str) -> str:
+    """Persist PIL image/bytes/path-like model output to disk and return path."""
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    if hasattr(image, "save"):
+        image.save(path)
+    elif isinstance(image, (bytes, bytearray)):
+        path.write_bytes(bytes(image))
+    elif isinstance(image, str) and Path(image).exists():
+        path.write_bytes(Path(image).read_bytes())
+    else:
+        path.write_bytes(_PNG_BYTES)
+
     return str(path)
 
 
