@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from goldman_ai.models import GoldmanAIModel
+from goldman_ai.pipelines.output_store import ensure_output_image, output_url_from_path
 from goldman_ai.pipelines.processing import run_goldman_sampling
 
 
@@ -30,12 +31,13 @@ def add_object(
     sampler_debug = []
     for idx in range(settings["sample_count"]):
         output_path = f"{settings['output_dir']}/add_object_{idx + 1}.png"
+        ensure_output_image(output_path)
         sampled = run_goldman_sampling(
             output_path,
             iterations=settings["sampler_iterations"],
             params=processing_params,
         )
-        output_images.append(sampled["final_image"])
+        output_images.append(output_url_from_path(sampled["final_image"]))
         sampler_debug.append(sampled)
     return {
         "task": "add_object",
@@ -70,12 +72,13 @@ def remove_object(
     sampler_debug = []
     for idx in range(settings["sample_count"]):
         output_path = f"{settings['output_dir']}/remove_object_{idx + 1}.png"
+        ensure_output_image(output_path)
         sampled = run_goldman_sampling(
             output_path,
             iterations=settings["sampler_iterations"],
             params=processing_params,
         )
-        output_images.append(sampled["final_image"])
+        output_images.append(output_url_from_path(sampled["final_image"]))
         sampler_debug.append(sampled)
     return {
         "task": "remove_object",
@@ -109,12 +112,13 @@ def restyle_image(
     sampler_debug = []
     for idx in range(settings["sample_count"]):
         output_path = f"{settings['output_dir']}/restyle_image_{idx + 1}.png"
+        ensure_output_image(output_path)
         sampled = run_goldman_sampling(
             output_path,
             iterations=settings["sampler_iterations"],
             params=processing_params,
         )
-        output_images.append(sampled["final_image"])
+        output_images.append(output_url_from_path(sampled["final_image"]))
         sampler_debug.append(sampled)
     return {
         "task": "restyle_image",

@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from goldman_ai.models import GoldmanAIModel
 from goldman_ai.pipelines import add_object, remove_object, restyle_image, run_image_to_image, run_text_to_image
 
-app = FastAPI(title="Goldman AI Inference API", version="0.3.0")
+app = FastAPI(title="Goldman AI Inference API", version="0.4.0")
 model = GoldmanAIModel()
 model.load()
 
@@ -76,9 +80,51 @@ class RestyleRequest(BaseModel):
     processing_params: ProcessingParams | None = None
 
 
+app.mount("/outputs", StaticFiles(directory="./outputs"), name="outputs")
+
+
+@app.get("/", response_class=HTMLResponse)
+def web_app() -> str:
+    return """
+    <html>
+      <head><title>Goldman AI Web App</title></head>
+      <body style='font-family: sans-serif; max-width: 720px; margin: 2rem auto;'>
+        <h1>Goldman AI Demo</h1>
+        <p>Generate a sample image from text:</p>
+        <button onclick="runDemo()">Run text-to-image demo</button>
+        <pre id='result' style='white-space: pre-wrap; background: #f6f6f6; padding: 1rem;'></pre>
+        <script>
+          async function runDemo() {
+            const res = await fetch('/generate/text-to-image', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                prompt: 'A futuristic skyline at sunset',
+                samples: 1,
+                sampler_iterations: 2,
+                processing_params: {blur: 0.2, noise: 0.03, sharpen: 0.2}
+              })
+            });
+            const data = await res.json();
+            document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+          }
+        </script>
+      </body>
+    </html>
+    """
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/download/{filename}")
+def download_result(filename: str) -> FileResponse:
+    path = Path("./outputs") / filename
+    if not path.exists() or not path.is_file():
+        raise HTTPException(status_code=404, detail="Result file not found")
+    return FileResponse(path=path, filename=path.name, media_type="application/octet-stream")
 
 
 @app.post("/generate/text-to-image", response_model=GenerationResponse)

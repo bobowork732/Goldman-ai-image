@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from goldman_ai.models import GoldmanAIModel
+from goldman_ai.pipelines.output_store import ensure_output_image, output_url_from_path
 from goldman_ai.pipelines.processing import run_goldman_sampling
 
 
@@ -28,12 +29,13 @@ def run_text_to_image(
     sampler_debug = []
     for idx in range(settings["sample_count"]):
         output_path = f"{settings['output_dir']}/text_to_image_{idx + 1}.png"
+        ensure_output_image(output_path)
         sampled = run_goldman_sampling(
             output_path,
             iterations=settings["sampler_iterations"],
             params=processing_params,
         )
-        output_images.append(sampled["final_image"])
+        output_images.append(output_url_from_path(sampled["final_image"]))
         sampler_debug.append(sampled)
     return {
         "task": "text_to_image",
