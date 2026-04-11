@@ -1,0 +1,58 @@
+dataset:
+  path: ./data
+  source_type: folder
+  strict_checks: false
+  allow_empty_caption: false
+
+train:
+  batch_size: 8
+  resolution: 256
+  num_workers: 4
+  center_crop: false
+  random_flip: true
+  color_jitter: 0.0
+  val_split: 0.1
+
+  vae_pretrain_steps: 10000
+  total_steps: 100000
+  vae_lr: 1.0e-4
+  diffusion_lr: 5.0e-5
+  kl_weight: 1.0e-6
+  cond_dropout: 0.1
+  ema_decay: 0.9999
+
+  checkpoint_dir: ./checkpoints
+  checkpoint_interval: 1000
+  eval_interval: 500
+  sample_interval: 500
+  keep_top_k: 3
+
+  sample_steps: 20
+  sample_guidance_scale: 7.5
+  sample_prompts:
+    - "a cinematic mountain landscape at sunset"
+
+  logger: none
+  log_dir: runs/default
+  wandb_project: latent-diffusion
+  run_name: null
+  log_interval: 50
+
+vae:
+  base_channels: 64
+  latent_channels: 4
+
+text_encoder:
+  model_name: openai/clip-vit-base-patch32
+  max_length: 77
+  embed_dim: 768
+
+unet:
+  base_channels: 128
+  channel_mults: [1, 2, 4]
+  time_embed_dim: 512
+
+diffusion:
+  num_train_steps: 1000
+  beta_start: 1.0e-4
+  beta_end: 0.02

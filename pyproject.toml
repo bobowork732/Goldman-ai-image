@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools==75.1.0", "wheel==0.44.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "goldman-ai-image"
+version = "0.1.0"
+description = "Latent diffusion training and inference scaffold"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+  "torch==2.4.1",
+  "torchvision==0.19.1",
+  "torchaudio==2.4.1",
+  "transformers==4.44.2",
+  "tokenizers==0.19.1",
+  "safetensors==0.4.5",
+  "pyyaml==6.0.2",
+  "pillow==10.4.0",
+  "numpy==1.26.4",
+  "tensorboard==2.17.1",
+  "wandb==0.18.1",
+  "accelerate==0.34.2",
+  "datasets==2.21.0",
+  "tqdm==4.66.5",
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff==0.6.8",
+  "pytest==8.3.3",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
